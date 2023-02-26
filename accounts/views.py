@@ -96,9 +96,11 @@ class AlterUser(APIView):
         return Response(status=HTTP_204_NO_CONTENT)
 
 
-class UserProfiles(APIView):
-    def get(self, request):
-        profiles = UserProfile.objects.all()
-        serializer = ProfileSerializer(profiles, many=True)
+class Profile(APIView):
+    def get(self, request, pk):
+        profile = get_object_or_404(UserProfile, id=pk)
+        serializer = ProfileSerializer(profile)
         return Response(serializer.data, status=HTTP_200_OK)
+
+
         

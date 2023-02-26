@@ -45,4 +45,3 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         # depth = 1
         fields = '__all__'
-
