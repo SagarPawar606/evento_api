@@ -15,7 +15,7 @@ class UserProfile(models.Model):
                     help_text='You can mention contact number, email id or social handels here.',
                     null=True, blank=True)
     is_publisher = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(auto_now_add=True, editable=False)
+    date_joined = models.DateField(auto_now_add=True, editable=False)
 
     def __str__(self):
         return self.user.username

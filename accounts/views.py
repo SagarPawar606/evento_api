@@ -2,9 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import User
 
-from .models import UserProfile
+from accounts.models import UserProfile
 from .forms import UserRegistrationForm
-from .serializers import getUserSerializer, registerUserSerializer
+from .serializers import GetUserSerializer, RegisterUserSerializer, ProfileSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,7 +25,6 @@ def registeruser(request):
     return render(request, 'accounts\index.html', {'form':form})
 
 class Api_home(APIView):
-    permission_classes = [IsAuthenticated]
     def get(self, request):
         api_routes = {'user registration form' : '/register',
                     'all users' : '/user',
@@ -40,11 +39,11 @@ class UsersList(APIView):
     ''' returns all the registered users '''
     def get(self, request, format=None):
         users = User.objects.all()
-        serializer = getUserSerializer(users, many=True)
+        serializer = GetUserSerializer(users, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = getUserSerializer(data=request.data)
+        serializer = GetUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=HTTP_201_CREATED)
@@ -53,9 +52,8 @@ class UsersList(APIView):
 
 class RegisterUser(APIView):
     ''' user registration api endpoint view '''
-
     def post(self, request):
-        serializer = registerUserSerializer(data=request.data)
+        serializer = RegisterUserSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
             saved_user = serializer.save()
@@ -68,8 +66,7 @@ class RegisterUser(APIView):
         return Response(data, status)
 
 class AlterUser(APIView):
-    ''' get/alter/delete a perticular user'''
-    
+    ''' get/alter/delete a perticular user (only by admin user)'''
     permission_classes = [IsAdminUser]
     
     @staticmethod
@@ -80,13 +77,13 @@ class AlterUser(APIView):
         user = self.get_user(pk)
         # if not user:
         #     return Response(status=HTTP_404_NOT_FOUND)
-        serializer = getUserSerializer(user)
+        serializer = GetUserSerializer(user)
         print(self.request.user)
         return Response(serializer.data, status=HTTP_200_OK)
     
     def put(self, request, pk):
         user = self.get_user(pk)
-        serializer = getUserSerializer(instance=user, data=request.data)
+        serializer = GetUserSerializer(instance=user, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=HTTP_200_OK)
@@ -99,6 +96,9 @@ class AlterUser(APIView):
         return Response(status=HTTP_204_NO_CONTENT)
 
 
-
-    
+class UserProfiles(APIView):
+    def get(self, request):
+        profiles = UserProfile.objects.all()
+        serializer = ProfileSerializer(profiles, many=True)
+        return Response(serializer.data, status=HTTP_200_OK)
         
